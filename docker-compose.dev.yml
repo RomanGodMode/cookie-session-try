@@ -1,7 +1,8 @@
-version: '3.0'
+version: '3.8'
 
 services:
   db:
+    container_name: db
     image: postgres:11.2
     restart: always
     environment:
@@ -24,7 +25,9 @@ services:
     container_name: nestjs_api_dev
     build:
       context: ./server
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile
+      target: development
+    command: npm run start:dev
     env_file:
       - ./server/.env.development
     ports:
@@ -34,7 +37,7 @@ services:
 
     volumes:
       - ./server:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./usr/src/app/node_modules
     restart: always
 
   client:
