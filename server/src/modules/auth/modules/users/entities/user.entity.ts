@@ -6,8 +6,8 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ length: 500, unique: true })
-  name: string
+  @Column({ length: 60, unique: true })
+  email: string
 
   @Column({ length: 500 })
   password: string
@@ -15,7 +15,7 @@ export class User {
 
   @BeforeInsert()
   async beforeInsert() {
-    this.password = await bcrypt.hash(this.password, process.env.BCRYPT_HASH_ROUND);
+    this.password = await bcrypt.hash(this.password, bcrypt.genSaltSync(+process.env.BCRYPT_HASH_ROUND))
   }
 
   async comparePassword(password: string): Promise<boolean> {

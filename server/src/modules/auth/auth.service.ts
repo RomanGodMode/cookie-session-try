@@ -1,23 +1,38 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
-import { UsersService } from '../users/users.service'
+import { UsersService } from './modules/users/users.service'
+import { RegisterDto } from './dto/register.dto'
+import { LoginDto } from './dto/login.dto'
+import { Response } from 'express'
+import { Session } from 'express-session'
 
 @Injectable()
 export class AuthService {
   constructor(private usersService: UsersService) {
   }
 
-  async register(): Promise<null> {
-    return null
+  async register(newUser: RegisterDto) {
+    await this.usersService.createUser(newUser)
   }
 
-  async login(session: Record<string, any>): Promise<null> {
+  async login(loginDto: LoginDto, session: Record<string, any>) {
+    const user = await this.usersService.findUserByEmail(loginDto.email)
 
-    // throw new UnauthorizedException('Чел ты ')
+    if (!user) {
+      throw new UnauthorizedException('no such email')
+    }
 
-    return null
+    const passwordsMatch = await user.comparePassword(loginDto.password)
+
+    if (!passwordsMatch) {
+      throw new UnauthorizedException('wrong combination of email and password')
+    }
+
+    session.userId = user.id
   }
 
-  async logout(): Promise<null> {
-    return null
+  async logout(session: Session, res: Response) {
+    session.destroy(err => err && console.log(err))
+    await res.clearCookie(process.env.SESSION_NAME)
   }
+
 }
