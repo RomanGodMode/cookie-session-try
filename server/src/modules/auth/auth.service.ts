@@ -4,18 +4,19 @@ import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
 import { Response } from 'express'
 import { Session } from 'express-session'
+import { UserRole } from './modules/users/entities/user.entity'
 
 @Injectable()
 export class AuthService {
   constructor(private usersService: UsersService) {
   }
 
-  async register(newUser: RegisterDto) {
-    await this.usersService.createUser(newUser)
+  async register(newUser: RegisterDto, role: UserRole) {
+    await this.usersService.createUser(newUser, role)
   }
 
-  async login(loginDto: LoginDto, session: Record<string, any>) {
-    const user = await this.usersService.findUserByEmail(loginDto.email)
+  async login(loginDto: LoginDto, session: Record<string, any>, role: UserRole) {
+    const user = await this.usersService.findUserByEmailAndRole(loginDto.email, role)
 
     if (!user) {
       throw new UnauthorizedException('no such email')
@@ -28,6 +29,7 @@ export class AuthService {
     }
 
     session.userId = user.id
+    session.role = role
   }
 
   async logout(session: Session, res: Response) {

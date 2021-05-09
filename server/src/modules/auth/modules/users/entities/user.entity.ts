@@ -1,6 +1,8 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import * as bcrypt from 'bcryptjs'
 
+export type UserRole = 'buyer' | 'admin'
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -12,6 +14,10 @@ export class User {
   @Column({ length: 500 })
   password: string
 
+  @Column({ type: 'text', default: 'buyer' })
+  role: UserRole
+  // Енамы обнуляются при коннекте к бд (во время синхронизации)
+  // я не смог найти даже похожей проблемы в интернете
 
   @BeforeInsert()
   async beforeInsert() {
